@@ -1,7 +1,13 @@
-'use client';
-
 import { Container, Typography, Paper } from '@mui/material';
 import ProductForm from '@/components/products/ProductForm';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Create New Product',
+  description: 'Add a new product to the FakeShop marketplace',
+};
+
+
 
 export default function CreateProductPage() {
     return (

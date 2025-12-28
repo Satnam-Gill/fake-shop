@@ -1,6 +1,7 @@
 import { getProduct } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import ProductDetails from '@/components/products/ProductDetails';
+import { Metadata } from 'next';
 
 // export const revalidate = 3600;
 
@@ -38,6 +39,35 @@ export async function generateStaticParams() {
   }
 }
 
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const { id } = await params;
+  
+  if (!/^[1-9][0-9]*$/.test(id)) {
+    return {
+      title: 'Product Not Found',
+      description: 'The requested product could not be found',
+    };
+  }
+  
+  const product = await getProduct(id);
+  if (!product) {
+    return {
+      title: 'Product Not Found',
+      description: 'The requested product could not be found',
+    };
+  }
+  
+  return {
+    title: product.title,
+    description: product.description,
+  };
+}
+
 export default async function ProductDetailPage({
    params,
 }: {
@@ -50,22 +80,10 @@ export default async function ProductDetailPage({
     return notFound();
   }
   
-  try {
-      const product = await getProduct(id);
-      if (!product) {
-          return notFound();
-        }
-
-    return <ProductDetails product={product} />;
-  } catch (error) {
-    console.error('Error fetching product in component:', error);
-    
-    // Check if it's a 403 error specifically and handle accordingly
-    if (error instanceof Error && error.message.includes('403')) {
-      console.error(`403 Forbidden error for product ID: ${id}`);
+  const product = await getProduct(id);
+  if (!product) {
       return notFound();
     }
-    
-    return notFound();
-  }
+
+  return <ProductDetails product={product} />;
 }

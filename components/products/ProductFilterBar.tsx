@@ -19,7 +19,7 @@ export default function ProductFilterBar({ onSearchChange, onCategoryChange, onS
     useEffect(() => {
         const timer = setTimeout(() => {
             onSearchChange(searchTerm);
-        }, 500);
+        }, 1000);
         return () => clearTimeout(timer);
     }, [searchTerm, onSearchChange]);
 
