@@ -47,13 +47,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                             borderRadius: 2,
                             boxShadow: 1
                         }}>
-                             {/* Use regular img if Next Image is tricky with external domains without config */}
                             <img 
                                 src={image} 
                                 alt={title} 
                                 style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
                                 onError={(e) => {
-                                    // Fallback image if the original fails to load
                                     (e.target as HTMLImageElement).src = '/placeholder-image.jpg';
                                 }}
                             />

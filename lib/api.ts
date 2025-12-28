@@ -6,10 +6,15 @@ async function fetcher<T>(url: string, options?: RequestInit): Promise<T> {
     try {
         const res = await fetch(`${BASE_URL}${url}`, {
             ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'NextJS App',
+                ...options?.headers,
+            },
         });
         if (!res.ok) {
             console.error(`API Error: ${res.status} ${res.statusText} at ${url}`);
-            throw new Error(`API Error: ${res.status}`);
+            throw new Error(`API Error: ${res.status} ${res.statusText}`);
         }
         return res.json();
     } catch (error) {
@@ -34,7 +39,25 @@ export const getProductsByCategory = async (category: string, sort: 'asc' | 'des
 };
 
 export const getProduct = async (id: string): Promise<Product> => {
-    return fetcher<Product>(`/products/${id}`);
+    // Try multiple times in case of 403 errors
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            return await fetcher<Product>(`/products/${id}`);
+        } catch (error) {
+            // If it's a 403 error and this was the last attempt, re-throw it
+            if (error instanceof Error && error.message.includes('403') && attempt === 3) {
+                throw error;
+            }
+            // Wait a bit before retrying (only if not the last attempt)
+            if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Increasing delay
+            }
+        }
+    }
+    
+    // This shouldn't be reached due to the error handling in fetcher,
+    // but added for TypeScript completeness
+    throw new Error('Failed to fetch product after multiple attempts');
 };
 
 export const getCategories = async (): Promise<string[]> => {
